@@ -76,9 +76,6 @@ for n = 1:size(keypoint, 1)
     viscircles(coordinate_tmp.*radius, radius, 'LineWidth', 0.5, 'Color', 'r');
 end
 
-
-
-% Add comments to test github TOBEDELETE!
 % =========================Utils funciton=================================
 function [minv, maxv] = findCurrLocalExtremas(N, x, y, image)
     minv = 999;
