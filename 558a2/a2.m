@@ -1,6 +1,5 @@
 %read the image, take the blue channel
-c
-ear all;
+clear all;
 clc;
 image = imread('manor.png');
 original_image = image(:, :, 3);
@@ -66,7 +65,7 @@ for l_num = 2:5
     end
 end
 
-color = {'r', 'g', 'b'};
+color = {'b', 'g', 'y', 'm'};
 figure(3);
 imshow(original_image);
 hold on;
@@ -74,8 +73,50 @@ for n = 1:size(keypoint, 1)
     radius = keypoint(n, 3);
     coordinate_tmp = [keypoint(n, 1), keypoint(n, 2)];
     level = log2(keypoint(n, 3));
-    viscircles(coordinate_tmp.*radius, radius, 'LineWidth', 0.5, 'Color', 'r');
+    viscircles(coordinate_tmp.*radius, radius, 'LineWidth', 0.5, 'Color', color{level});
 end
+
+% ====================Q4. Compute SIFT feature vectors=====================
+gmag = cell(7, 1);
+gdir = cell(7, 1);
+gau_gmag = cell(7, 1);
+x_gmag = cell(7, 1);
+y_gmag = cell(7, 1);
+for i = 1:7
+    [gmag{i}, gdir{i}] = imgradient(gaupyramid{i});
+    [x_gmag{i}, y_gmag{i}] = imgradientxy(gaupyramid{i});
+end
+% choose a keypoint
+selected_point = keypoint(51, :);
+x = selected_point(1);
+y = selected_point(2);
+level = log2(selected_point(3))+1;
+mag_tmp = gmag{level};
+dir_tmp = gdir{level};
+x_gmag_tmp = x_gmag{level};
+y_gmag_tmp = y_gmag{level};
+mag_selected = imcrop(mag_tmp, [x-7, y-7, 14, 14]);
+dir_selected = imcrop(dir_tmp, [x-7, y-7, 14, 14]);
+x_gmag_selected = imcrop(x_gmag_tmp, [x-7, y-7, 14, 14]);
+y_gmag_selected = imcrop(y_gmag_tmp, [x-7, y-7, 14, 14]);
+kernel = fspecial('gaussian', [15, 15], 2);
+weighted_mag = kernel.*mag_selected;
+
+figure(4);
+subplot(1, 3, 1);
+imshow(uint8(mag_selected));
+hold on;
+[X, Y] = meshgrid(1:15, 1:15);
+quiver(X, Y, x_gmag_selected, y_gmag_selected);
+subplot(1, 3, 2);
+imshow(uint8(weighted_mag));
+
+
+
+
+
+
+
 
 % =========================Utils funciton=================================
 function [minv, maxv] = findCurrLocalExtremas(N, x, y, image)
