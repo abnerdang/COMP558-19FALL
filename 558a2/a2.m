@@ -1,5 +1,6 @@
 %read the image, take the blue channel
-clear all;
+c
+ear all;
 clc;
 image = imread('manor.png');
 original_image = image(:, :, 3);
