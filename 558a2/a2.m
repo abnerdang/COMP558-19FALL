@@ -1,6 +1,8 @@
 %read the image, take the blue channel
 clear all;
 clc;
+%================hyper parameters definition============================
+
 image = imread('manor.png');
 original_image = rgb2gray(image);
 % original_image = image(:, :, 3);
@@ -19,6 +21,7 @@ for i = 1:7
     sigma = 2^(i-1);
     kernel = fspecial('gaussian', [kernel_size, kernel_size], sigma);
     gaupyramid{i} = conv2(gaupyramid{i}, kernel, 'same');
+    % gaupyramid{i} = imgaussfilt(gaupyramid{i}, 2);
     if i ~= 1
         gaupyramid{i} = imresize(gaupyramid{i}, 0.5);
     end
@@ -80,6 +83,7 @@ for n = 1:size(keypoint, 1)
     radius = keypoint(n, 3);
     coordinate_tmp = [keypoint(n, 2), keypoint(n, 1)];
     level = log2(keypoint(n, 3));
+    %we should map the coordinate to the original coordinate
     viscircles(coordinate_tmp.*radius, radius, 'LineWidth', 0.5, 'Color', color{level});
 end
 
@@ -100,12 +104,14 @@ x = selected_point(1);
 y = selected_point(2);
 level = log2(selected_point(3))+1;
 
+% get the corresponding magnitude and direction 
 gau_img_tmp = gaupyramid{level};
 mag_tmp = gmag{level};
 dir_tmp = gdir{level};
 x_gmag_tmp = x_gmag{level};
 y_gmag_tmp = y_gmag{level};
 
+% For a sift point
 gau_img_selected = imcrop(gau_img_tmp, [x-7, y-7, 14, 14]);
 mag_selected = imcrop(mag_tmp, [x-7, y-7, 14, 14]);
 dir_selected = imcrop(dir_tmp, [x-7, y-7, 14, 14]);
@@ -180,32 +186,63 @@ subplot(1, 2, 2);
 bar(bin_num, selected_hista);
 title("Histogram with alignment");
 % =========Q6. Rotate and scale original image===========
-eg1 = imTransform(original_image, 200, 500, 30, 0.5);
-eg2 = imTransform(original_image, 700, 900, -30, 2);
+point1 = [572, 672];
+point2 = [500, 700];
+scale1 = 1;
+scale2 = 0.5;
+eg1 = imTransform(original_image, point1(1), point1(2), 0, scale1);
+eg2 = imTransform(original_image, point2(1), point2(2), -30, scale2);
 figure(6)
 subplot(1, 2, 1);
 imshow(uint8(eg1));
+hold on;
+plot(point1(2)*scale1, point1(1)*scale1, 'r*');
+axis on;
 subplot(1, 2, 2);
 imshow(uint8(eg2));
+hold on;
+plot(point2(2)*scale2, point2(1)*scale2, 'r*');
+axis on;
+
+%==============Q7. Features matching=====================================
+sift1 = siftPipeline(eg1);
+sift2 = siftPipeline(eg2);
+
+% get interested sift features
+inshift = 100;
+Hsource = selectSift(inshift, point1, hist_align);
+point11 = point1*scale1;
+inshift1 = inshift*scale1;
+Htarget = selectSift(inshift1, point11, sift1);
+pairs1 = findPairs(Hsource, Htarget);
 
 
-
-
-% =========================Utils funciton================================= 
-function hist = getHistgram(mag, dir)
-    hist = zeros(1, 36);
-    for i = 1:size(mag, 1)
-        for j = 1:size(mag, 2)
-            cur = dir(i, j)+180.0;
-            % index begin from 0
-            index = floor(cur/10);
-            hist(index+1) = hist(index+1) + mag(i, j);
-        end
-    end         
+% plot the result
+Markers = {'+','o','*','x','v','d','^','s','>','<'};
+figure(7);
+imsize = max(size(original_image, 1), size(eg1, 1));
+sizep = size(pairs1);
+imshowpair(original_image, eg1, 'montage');
+axis on;
+hold on;
+for i = 1:sizep
+    vec1 = Hsource(pairs1(i, 1), 1:3);
+    vec2 = Htarget(pairs1(i, 2), 1:3);
+    pos1 = vec1(1:2)*vec1(3);
+    pos2 = vec2(1:2)*vec2(3);
+    posinfig1 = pos1;
+    posinfig2 = [pos2(1), pos2(2)+imsize];
+    x1 = posinfig1(2);
+    x2 = posinfig2(2);
+    y1 = posinfig1(1);
+    y2 = posinfig2(1);
+    plot([x1, x2], [y1, y2], 'r-', 'Color', [rand(1), rand(1), rand(1)]);
+    plot([x1, x2], [y1, y2], 'Marker', Markers{ceil(rand(1)*10)}, 'Color', [rand(1), rand(1), rand(1)]);
 end
 
 
-    
+
+
 
                 
   
