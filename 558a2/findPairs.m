@@ -1,6 +1,7 @@
 function pairs = findPairs(Hsource, Htarget)
-    sizes = size(Hsource);
-    sizet = size(Htarget);
+    sizes = size(Hsource, 1);
+    sizet = size(Htarget, 1);
+    flag = zeros(sizet, 1);
     % normalize the histogram
     % notice there are still 0s in the sift feature vectors
     for i = 1:sizes
@@ -27,7 +28,11 @@ function pairs = findPairs(Hsource, Htarget)
             continue;
         end
         dmin = 1;
+        jmin = -1;
         for j = 1:sizet
+            if flag(j) == 1
+                continue;
+            end
             Httmp = Htarget(j, 4:end);
             if sum(Httmp) == 0
                 continue;
@@ -36,8 +41,12 @@ function pairs = findPairs(Hsource, Htarget)
             if dtmp < dmin
                 pairtmp(2) = j;
                 dmin = dtmp;
+                jmin = j;
             end
         end
-        pairs = [pairs; pairtmp];      
+        if jmin > 0
+            flag(jmin) = 1;
+            pairs = [pairs; pairtmp];  
+        end
     end
 end

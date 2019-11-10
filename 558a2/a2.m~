@@ -5,19 +5,17 @@ clc;
 % kernel size for guassian pyramid
 kernel_size = 5;
 % threshold for laplacian pyramid
-th = 1.1;
+th = ;
 spatial_size = 5;
 % selected keypoint for visualization
 selected_keypoint_index = 3;
 % weighted gaussian sigma
 wsigma = 10;
 
-scale1 = 0.5;
+scale1 = 2;
 angle1 = 15;
-% point1 = [268, 382];
-% point1 = [390, 672];
-%point1 = [500, 700];
-point1 = [628 672];
+%point1 = [268, 382];
+point1 = [390, 672];
 
 %=======================================================================
 image = imread('manor.png');

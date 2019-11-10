@@ -9,9 +9,8 @@ function sift = siftPipeline(original_image, kernel_size, th, spatial_size, wsig
         end
         %for each level, smooth it with a Gaussian
         sigma = 2^(i-1);
-        % kernel = fspecial('gaussian', [kernel_size, kernel_size], sigma);
-        % gaupyramid{i} = conv2(gaupyramid{i}, kernel, 'same');
-        gaupyramid{i} = imgaussfilt(gaupyramid{i}, 2);
+        kernel = fspecial('gaussian', [kernel_size, kernel_size], sigma);
+        gaupyramid{i} = conv2(gaupyramid{i}, kernel, 'same');
         if i ~= 1
             gaupyramid{i} = imresize(gaupyramid{i}, 0.5);
         end
@@ -32,13 +31,12 @@ function sift = siftPipeline(original_image, kernel_size, th, spatial_size, wsig
         current = lplpyramid{l_num};
         previous = imresize(lplpyramid{l_num-1}, 0.5);
         next = imresize(lplpyramid{l_num+1}, 2);
-        bound = (spatial_size+1)/2;
-        for i = bound:size(current, 1)-bound+1
-            for j = bound:size(current, 2)-bound+1
+        for i = :size(current, 1)-1
+            for j = 2:size(current, 2)-1
                 sift_window(1:spatial_size, 1:spatial_size) = current(i-shift:i+shift, j-shift:j+shift);
                 sift_window(spatial_size+1:(spatial_size*2), 1:spatial_size) = previous(i-shift:i+shift, j-shift:j+shift);
                 sift_window((spatial_size*2+1):spatial_size*3, 1:spatial_size) = next(i-shift:i+shift, j-shift:j+shift);
-                sift_window(bound, bound) = sift_window(1, 1);
+                sift_window(2, 2) = sift_window(1, 1);
                 maxv = max(max(sift_window));
                 minv = min(min(sift_window));
                 if current(i, j) > (maxv+th)
