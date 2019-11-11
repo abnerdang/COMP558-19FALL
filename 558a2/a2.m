@@ -5,22 +5,28 @@ clc;
 % kernel size for guassian pyramid
 kernel_size = 5;
 % threshold for laplacian pyramid
-th = 1.1;
-spatial_size = 5;
+th = 1;
+spatial_size = 3;
 % selected keypoint for visualization
 selected_keypoint_index = 3;
 % weighted gaussian sigma
-wsigma = 10;
+wsigma = 3;
 
-scale1 = 0.5;
-angle1 = 15;
+scale1 = 1.25;
+angle1 = -15;
+scale2 = 1.25;
+angle2 = -15;
 % point1 = [268, 382];
 % point1 = [390, 672];
-%point1 = [500, 700];
-point1 = [628 672];
+% point1 = [500, 700];
+% point1 = [628 672];
+point1 = [194 384];
+% point1 = [104, 594];
 
 %=======================================================================
+% image = imread('books.jpg');
 image = imread('manor.png');
+image = imresize(image, [1024, 1024]);
 original_image = rgb2gray(image);
 % original_image = image(:, :, 3);
 
@@ -45,6 +51,7 @@ for i = 1:7
     
     subplot(2, 4, i);
     imshow(uint8(gaupyramid{i})); 
+    title({['Gaussian Pyramid'], ['sigma = ', num2str(sigma)]});
 end
 
 
@@ -59,6 +66,7 @@ for i = 1:6
     
     subplot(2, 3, i);
     imshow(uint8(lplpyramid{i}), []);
+    title({['Laplacian Pyramid'], ['level ', num2str(i)], [num2str(spatial_size), '×', num2str(spatial_size),' spatial neighbor']});
 end
     
 % ====================Find SIFT features============================
@@ -206,20 +214,23 @@ title("Histogram with alignment");
 % =========Q6. Rotate and scale original image===========
 
 point2 = [500, 700];
-scale2 = 0.5;
+scale2 = 1.25;
 eg1 = imTransform(original_image, point1(1), point1(2), angle1, scale1);
 eg2 = imTransform(original_image, point2(1), point2(2), -30, scale2);
 figure(6)
 subplot(1, 2, 1);
 imshow(uint8(eg1));
 hold on;
-plot(point1(2)*scale1, point1(1)*scale1, 'r*');
+plot(point1(2)*scale1, point1(1)*scale1, 'r*', 'LineWidth', 2);
 axis on;
+title({['Rotated angle = ', num2str(angle1)], ['Scale = ', num2str(scale1)]});
+
 subplot(1, 2, 2);
 imshow(uint8(eg2));
 hold on;
-plot(point2(2)*scale2, point2(1)*scale2, 'r*');
+plot(point2(2)*scale2, point2(1)*scale2, 'r*', 'LineWidth', 2);
 axis on;
+title({['Rotated angle = ', num2str(angle2)], ['Scale = ', num2str(scale2)]});
 
 %==============Q7. Features matching=====================================
 sift1 = siftPipeline(eg1, kernel_size, th, spatial_size, wsigma);
