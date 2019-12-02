@@ -53,6 +53,18 @@ function sift = siftPipeline(original_image, kernel_size, th, spatial_size, wsig
             end
         end
     end
+    
+    color = {'b', 'g', 'y', 'm'};
+    figure;
+    imshow(original_image);
+    hold on;
+    for n = 1:size(keypoint, 1)
+        radius = keypoint(n, 3);
+        coordinate_tmp = [keypoint(n, 2), keypoint(n, 1)];
+        level = log2(keypoint(n, 3));
+        %we should map the coordinate to the original coordinate
+        viscircles(coordinate_tmp.*radius, radius, 'LineWidth', 0.5, 'Color', color{level});
+    end
 
     % ====================Q4. Compute SIFT feature vectors=====================
     gmag = cell(7, 1);

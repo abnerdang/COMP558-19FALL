@@ -250,7 +250,7 @@ Markers = {'+','o','*','x','v','d','^','s','>','<'};
 figure(7);
 imsize = max(size(original_image, 1), size(eg1, 1));
 sizep = size(pairs1);
-imshowpair(original_image, eg1, 'montage');
+imshowpair(uint8(original_image), uint8(eg1), 'montage');
 axis on;
 hold on;
 for i = 1:sizep
